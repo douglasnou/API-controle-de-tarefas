@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { prisma } from "../database/prisma";
-import { TLoginRequest, TUserRequest } from "../schemas/user.schemas";
-import { compare, hash } from "bcryptjs";
+import { prisma } from "../database/prisma.js";
+import { TLoginRequest, TUserRequest } from "../schemas/user.schemas.js";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export class UserController {
@@ -16,7 +16,7 @@ export class UserController {
       return res.status(409).json({ message: "This email is already registered" });
     }
 
-    const hashedPassword = await hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await prisma.user.create({
       data: {
@@ -45,7 +45,7 @@ export class UserController {
       return res.status(404).json({ message: "User not exists" });
     }
 
-    const passwordMatch = await compare(password, user.password);
+    const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
       return res.status(401).json({ message: "Email and password doesn't match" });

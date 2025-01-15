@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { prisma } from "../database/prisma";
+import { prisma } from "../database/prisma.js";
 
 export const authMiddleware = async (
   req: Request,
