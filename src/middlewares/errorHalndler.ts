@@ -1,23 +1,26 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
+import jwt from "jsonwebtoken";
 import { ZodError } from "zod";
 
-export const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
-  if (err instanceof ZodError) {
+export const errorHandler = (
+  error: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (error instanceof jwt.JsonWebTokenError) {
+    return res.status(401).json({ message: error.message });
+  }
+
+  if (error instanceof ZodError) {
     return res.status(400).json({
-      errors: err.errors.map(e => ({
-        code: e.code,
-        expected: e.expected,
-        received: e.received,
-        path: e.path,
-        message: e.message
-      }))
+      message: error.errors.map((e) => ({
+        field: e.path.join("."),
+        message: e.message,
+      })),
     });
   }
 
-  if (err.status) {
-    return res.status(err.status).json({ message: err.message });
-  }
-
-  console.error(err);
-  return res.status(500).json({ message: 'Internal Server Error' });
+  console.error(error);
+  return res.status(500).json({ message: "Internal server error" });
 };
