@@ -1,11 +1,13 @@
 import { Router } from "express";
-import { createCategory, deleteCategory } from "../controllers/categoryController";
-import { validateSchema } from "../middlewares/zodValidationMiddleware";
-import { createCategorySchema } from "../schemas/categorySchema";
+import { CategoryController } from "../controllers/categoryController";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
-const router = Router();
+const categoryRoutes = Router();
+const categoryController = new CategoryController();
 
-router.post("/", validateSchema(createCategorySchema), createCategory);
-router.delete("/:id", deleteCategory);
+categoryRoutes.use(authMiddleware); // Protege todas as rotas
 
-export default router;
+categoryRoutes.post("/", categoryController.create);
+categoryRoutes.delete("/:id", categoryController.delete);
+
+export default categoryRoutes;

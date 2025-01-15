@@ -1,14 +1,16 @@
 import { Router } from "express";
-import { getTasks, getTaskById, updateTask, deleteTask, createTask } from "../controllers/taskController";
-import { validateSchema } from "../middlewares/zodValidationMiddleware";
-import { createTaskSchema, updateTaskSchema } from "../schemas/taskSchema";
+import { TaskController } from "../controllers/taskController";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
-const router = Router();
+const taskRoutes = Router();
+const taskController = new TaskController();
 
-router.post("/", validateSchema(createTaskSchema), createTask);
-router.get("/", getTasks); 
-router.get("/:id", getTaskById);
-router.patch("/:id", validateSchema(updateTaskSchema), updateTask);
-router.delete("/:id", deleteTask);
+taskRoutes.use(authMiddleware); // Protege todas as rotas
 
-export default router;
+taskRoutes.post("/", taskController.create);
+taskRoutes.get("/", taskController.list);
+taskRoutes.get("/:id", taskController.retrieve);
+taskRoutes.patch("/:id", taskController.update);
+taskRoutes.delete("/:id", taskController.delete);
+
+export default taskRoutes;

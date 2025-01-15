@@ -1,63 +1,41 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { prisma } from "../database/prisma";
 
-export const createCategory = async (req: Request, res: Response, next: NextFunction) => {
-  try {
+export class CategoryController {
+  async create(req: Request, res: Response) {
     const { name } = req.body;
-
-    if (!name || typeof name !== "string") {
-      return res.status(400).json({
-        errors: [{
-          code: "invalid_type",
-          expected: "string",
-          message: "Name is required and must be a string",
-          path: ["name"],
-          received: typeof name
-        }]
-      });
-    }
-
-    const existingCategory = await prisma.category.findFirst({
-      where: { name }
-    });
-
-    if (existingCategory) {
-      return res.status(409).json({ message: 'Category with this name already exists' });
-    }
+    const userId = res.locals.user.id;
 
     const category = await prisma.category.create({
-      data: { name }
+      data: {
+        name,
+        userId,
+      },
     });
 
-    return res.status(201).json({
-      id: category.id,
-      name: category.name
-    });
-  } catch (error) {
-    next(error);
+    return res.status(201).json(category);
   }
-};
 
-export const deleteCategory = async (req: Request, res: Response, next: NextFunction) => {
-  try {
+  async delete(req: Request, res: Response) {
     const { id } = req.params;
-
-    if (!id || isNaN(Number(id))) {
-      return res.status(400).json({ message: 'Invalid or missing category ID. It must be a valid number.' });
-    }
+    const userId = res.locals.user.id;
 
     const category = await prisma.category.findUnique({
-      where: { id: Number(id) }
+      where: { id: Number(id) },
     });
 
     if (!category) {
-      return res.status(404).json({ message: 'Category not found' });
+      return res.status(404).json({ message: "Category not found" });
     }
 
-    await prisma.category.delete({ where: { id: Number(id) } });
+    if (category.userId !== userId) {
+      return res.status(403).json({ message: "This user is not the category owner" });
+    }
+
+    await prisma.category.delete({
+      where: { id: Number(id) },
+    });
 
     return res.status(204).send();
-  } catch (error) {
-    next(error);
   }
-};
+}
