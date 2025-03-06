@@ -5,15 +5,19 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export class UserController {
-  async create(req: Request, res: Response) {
+  async register(req: Request, res: Response) {
     const { name, email, password }: TUserRequest = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "E-mail e senha são obrigatórios." });
+    }
 
     const userExists = await prisma.user.findUnique({
       where: { email },
     });
 
     if (userExists) {
-      return res.status(409).json({ message: "This email is already registered" });
+      return res.status(409).json({ message: "This email is already registered." });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

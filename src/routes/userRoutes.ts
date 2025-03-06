@@ -7,7 +7,7 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 const userRoutes = Router();
 const userController = new UserController();
 
-userRoutes.post("/users", validateBody(userSchema), userController.create);
+userRoutes.post("/users", validateBody(userSchema), userController.register);
 userRoutes.post("/users/login", validateBody(loginSchema), userController.login);
 userRoutes.get("/users/profile", authMiddleware, userController.profile);
 

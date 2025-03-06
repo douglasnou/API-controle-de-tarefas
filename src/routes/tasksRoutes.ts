@@ -5,7 +5,7 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 const taskRoutes = Router();
 const taskController = new TaskController();
 
-taskRoutes.use(authMiddleware); // Protege todas as rotas
+taskRoutes.use(authMiddleware);
 
 taskRoutes.post("/", taskController.create);
 taskRoutes.get("/", taskController.list);
